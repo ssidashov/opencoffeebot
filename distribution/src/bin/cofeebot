@@ -1,0 +1,11 @@
+#!/bin/bash
+
+JVM_OPTIONS_FILE="/etc/cofeebot/jvm.options"
+
+JVM_OPTIONS="$(grep "^-" $JVM_OPTIONS_FILE | tr '\n' ' ')"
+
+CMD="java $JVM_OPTIONS -Dlogging.config=/etc/cofeebot/logback-spring.xml  -jar /usr/lib/cofeebot/cofeebot.jar --spring.config.additional-location=file:/etc/cofeebot/"
+
+echo $CMD
+
+exec $CMD

@@ -1,0 +1,32 @@
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          public-key-location: classpath:public-key.txt
+  h2:
+    console:
+      enabled: true
+  datasource:
+    url:
+      jdbc:h2:file:~/cofeebot-data
+  jpa:
+    hibernate:
+      ddl-auto: update
+    generate-ddl: true
+    open-in-view: false
+    show-sql: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+cofeebot:
+  timerDelay: 15000
+  stagingPersonCountMultipler: 20
+  stagingWaitTimeMultiplier: 0.5
+  pairAcceptTimeoutSeconds: 60
+logging:
+  level:
+    ru.open.khm.cofeebot: debug
