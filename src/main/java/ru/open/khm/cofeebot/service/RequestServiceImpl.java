@@ -39,7 +39,7 @@ public class RequestServiceImpl implements RequestService {
         Optional<Request> activeRequestByUser = requestRepository.getRequestByUser_IdEqualsAndRequestStatusTypeIn(user.getId()
                 , Arrays.asList(RequestStatusType.CREATED, RequestStatusType.PAIRED));
         activeRequestByUser.ifPresent(request -> {
-            throw new IllegalArgumentException("Already registered request with id " + request.getId());
+            throw new IllegalStateException("Already registered request with id " + request.getId());
         });
 
         Instant now = Instant.now();
@@ -152,6 +152,7 @@ public class RequestServiceImpl implements RequestService {
         requestInfo.setMaxWaitSeconds(request.getMaxWaitSeconds());
         requestInfo.setCanPay(request.isCanPay());
         requestInfo.setCurrentPersonCount(request.getSameoLocationRequestCount());
+        requestInfo.setEstimatedWaitSeconds(request.getSecondsWaitEstimated());
         return requestInfo;
     }
 

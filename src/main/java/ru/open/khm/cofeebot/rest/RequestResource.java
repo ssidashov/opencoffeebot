@@ -24,6 +24,8 @@ public class RequestResource {
             return ResponseEntity.ok(requestService.createNew(requestInput));
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).header("Cause", e.getMessage()).build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).header("Cause", e.getMessage()).build();
         }
     }
 

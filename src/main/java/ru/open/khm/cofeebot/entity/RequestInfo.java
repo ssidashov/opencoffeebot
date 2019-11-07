@@ -23,4 +23,6 @@ public class RequestInfo {
     private Integer maxWaitSeconds;
 
     private Integer currentPersonCount;
+
+    private Integer estimatedWaitSeconds;
 }
