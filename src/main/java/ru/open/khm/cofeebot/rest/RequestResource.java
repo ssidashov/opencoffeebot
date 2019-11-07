@@ -5,8 +5,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.open.khm.cofeebot.entity.RequestStatus;
+import ru.open.khm.cofeebot.entity.RequestStatusType;
 import ru.open.khm.cofeebot.service.RequestService;
 import ru.open.khm.cofeebot.service.SkippedException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/request")
@@ -19,9 +23,12 @@ public class RequestResource {
     }
 
     @PostMapping
-    public ResponseEntity<String> createNew(@RequestBody RequestInput requestInput) {
+    public ResponseEntity<Map<String, String>> createNew(@RequestBody RequestInput requestInput) {
         try {
-            return ResponseEntity.ok(requestService.createNew(requestInput));
+            String registered = requestService.createNew(requestInput);
+            HashMap<String, String> resultMap = new HashMap<>();
+            resultMap.put("result", registered);
+            return ResponseEntity.ok(resultMap);
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).header("Cause", e.getMessage()).build();
         } catch (IllegalArgumentException e) {
@@ -43,7 +50,38 @@ public class RequestResource {
                     .header("Cause", e.getMessage())
                     .build();
         }
+    }
 
+    @PostMapping(path = "{id}/reject")
+    public ResponseEntity<String> reject(@PathVariable String id) {
+        try {
+            requestService.rejectRequest(id, RequestStatusType.REJECTED);
+            return ResponseEntity.ok(id);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .header("Cause", e.getMessage())
+                    .build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .header("Cause", e.getMessage())
+                    .build();
+        }
+    }
+
+    @PostMapping(path = "{id}/accept")
+    public ResponseEntity<String> accept(@PathVariable String id) {
+        try {
+            requestService.acceptRequest(id);
+            return ResponseEntity.ok(id);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .header("Cause", e.getMessage())
+                    .build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .header("Cause", e.getMessage())
+                    .build();
+        }
     }
 
     @GetMapping(path = "{id}/status")

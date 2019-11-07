@@ -11,4 +11,6 @@ public interface PairService {
     Optional<Request> rejectByRequest(Request request, Pair pair, RequestStatusType outcome);
 
     Pair makePair(Request request1, Request request2);
+
+    void acceptByRequest(Request request, Pair pair);
 }

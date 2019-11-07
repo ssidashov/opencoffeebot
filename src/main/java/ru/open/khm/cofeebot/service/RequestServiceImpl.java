@@ -67,13 +67,14 @@ public class RequestServiceImpl implements RequestService {
         }
         Optional<Pair> pairExists = pairRepository.findByFirstRequestEqualsOrSecondRequestEquals(request, request);
         pairExists.ifPresent(pair -> {
-            Optional<Request> requestToRenew = pairService.rejectByRequest(request, pair, RequestStatusType.CANCELLED);
-            requestToRenew.ifPresent(this::renewRequest);
+            rejectRequest(id, RequestStatusType.CANCELLED);
         });
         request.setRequestStatusType(RequestStatusType.CANCELLED);
     }
 
-    private Request renewRequest(Request request) {
+    @Override
+    @Transactional
+    public Request renewRequest(Request request) {
         Request newRequest = new Request();
         newRequest.setOriginalCreated(request.getOriginalCreated());
         newRequest.setLocation(request.getLocation());
@@ -88,6 +89,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    @Transactional
     public void rejectRequest(String id, RequestStatusType typeToReject) {
         Optional<Request> byId = requestRepository.findById(id);
         Request request = byId.orElseThrow(() -> new IllegalArgumentException("No request with id " + id));
@@ -96,16 +98,26 @@ public class RequestServiceImpl implements RequestService {
         }
         Optional<Pair> pairExists = pairRepository.findByFirstRequestEqualsOrSecondRequestEquals(request, request);
         pairExists.ifPresent(pair -> {
-            Optional<Request> requestToRenew = pairService.rejectByRequest(request, pair, RequestStatusType.REJECTED);
+            Optional<Request> requestToRenew = pairService.rejectByRequest(request, pair, typeToReject);
             requestToRenew.ifPresent(this::renewRequest);
         });
         renewRequest(request);
-        request.setRequestStatusType(RequestStatusType.REJECTED);
+        request.setRequestStatusType(typeToReject);
     }
 
     @Override
+    @Transactional
     public void acceptRequest(String id) {
-
+        Optional<Request> byId = requestRepository.findById(id);
+        Request request = byId.orElseThrow(() -> new IllegalArgumentException("No request with id " + id));
+        if (request.getRequestStatusType() != RequestStatusType.PAIRED) {
+            throw new IllegalStateException("Request status is not paird: " + request.getRequestStatusType());
+        }
+        request.setRequestStatusType(RequestStatusType.ACCEPTED);
+        Optional<Pair> pairExists = pairRepository.findByFirstRequestEqualsOrSecondRequestEquals(request, request);
+        pairExists.ifPresent(pair -> {
+            pairService.acceptByRequest(request, pair);
+        });
     }
 
     @Override
@@ -142,6 +154,30 @@ public class RequestServiceImpl implements RequestService {
         return current;
     }
 
+    @Override
+    public int getParentCountByStatus(Request request, RequestStatusType statusType) {
+        Request current = request;
+        int countTimeout = 0;
+        while (current.getOriginal() != null) {
+            if (current.getRequestStatusType() == statusType) {
+                countTimeout++;
+            }
+            current = current.getOriginal();
+        }
+        return countTimeout;
+    }
+
+    @Override
+    public int getParentCount(Request request) {
+        Request current = request;
+        int countTimeout = 0;
+        while (current.getOriginal() != null) {
+            countTimeout++;
+            current = current.getOriginal();
+        }
+        return countTimeout;
+    }
+
     private RequestInfo requestInfoFromRequest(Request request) {
         RequestInfo requestInfo = new RequestInfo();
         requestInfo.setPlace(request.getPlace());
@@ -153,6 +189,7 @@ public class RequestServiceImpl implements RequestService {
         requestInfo.setCanPay(request.isCanPay());
         requestInfo.setCurrentPersonCount(request.getSameoLocationRequestCount());
         requestInfo.setEstimatedWaitSeconds(request.getSecondsWaitEstimated());
+        requestInfo.setRequestStatusType(request.getRequestStatusType());
         return requestInfo;
     }
 

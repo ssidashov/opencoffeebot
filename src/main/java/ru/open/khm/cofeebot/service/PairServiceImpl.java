@@ -5,6 +5,9 @@ import org.springframework.stereotype.Service;
 import ru.open.khm.cofeebot.entity.*;
 import ru.open.khm.cofeebot.repository.PairRepository;
 
+import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
+import javax.persistence.PersistenceContext;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -13,12 +16,16 @@ import java.util.Optional;
 public class PairServiceImpl implements PairService {
     private final PairRepository pairRepository;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     public PairServiceImpl(PairRepository pairRepository) {
         this.pairRepository = pairRepository;
     }
 
     @Override
     public Optional<Request> rejectByRequest(Request request, Pair pair, RequestStatusType outcome) {
+        entityManager.lock(pair, LockModeType.PESSIMISTIC_WRITE);
         Optional<Pair> byFirstRequestEqualsOrSecondRequestEquals
                 = pairRepository.findByFirstRequestEqualsOrSecondRequestEquals(request, request);
         if (request.getRequestStatusType().isFinal()) {
@@ -29,16 +36,19 @@ public class PairServiceImpl implements PairService {
             boolean isFirst = pair.getFirstRequest() == request;
             request.setRequestStatusType(RequestStatusType.REJECTED);
             Request otherRequest = isFirst ? pair.getSecondRequest() : pair.getFirstRequest();
-            if (otherRequest.getRequestStatusType() == RequestStatusType.PAIRED) {
-                otherRequest.setRequestStatusType(RequestStatusType.SKIPPED);
-                return Optional.of(otherRequest);
-            }
             if (isFirst) {
                 pair.setFirstAccepted(Instant.now());
                 pair.setFirstDecision(outcome.getPairDecision());
-            }else{
+            } else {
                 pair.setSecondAccepted(Instant.now());
                 pair.setSecondDecision(outcome.getPairDecision());
+            }
+            if (otherRequest.getRequestStatusType() == RequestStatusType.PAIRED
+                    || otherRequest.getRequestStatusType() == RequestStatusType.ACCEPTED) {
+                if (otherRequest.getRequestStatusType() == RequestStatusType.PAIRED) {
+                    otherRequest.setRequestStatusType(RequestStatusType.SKIPPED);
+                }
+                return Optional.of(otherRequest);
             }
         }
         return Optional.empty();
@@ -54,5 +64,30 @@ public class PairServiceImpl implements PairService {
         request1.setRequestStatusType(RequestStatusType.PAIRED);
         request2.setRequestStatusType(RequestStatusType.PAIRED);
         return pair;
+    }
+
+    @Override
+    public void acceptByRequest(Request request, Pair pair) {
+        entityManager.lock(pair, LockModeType.PESSIMISTIC_WRITE);
+        boolean isFirst = pair.getFirstRequest() == request;
+        Request otherRequest = isFirst ? pair.getSecondRequest() : pair.getFirstRequest();
+        PairDecision otherState;
+        if (isFirst) {
+            pair.setFirstAccepted(Instant.now());
+            pair.setFirstDecision(PairDecision.ACCEPTED);
+            otherState = pair.getSecondDecision();
+        } else {
+            pair.setSecondAccepted(Instant.now());
+            pair.setSecondDecision(PairDecision.ACCEPTED);
+            otherState = pair.getFirstDecision();
+        }
+        if (otherState == null) {
+            return;
+        }
+        if (otherState == PairDecision.ACCEPTED) {
+            pair.setPairStatus(PairStatus.ACCEPTED);
+        } else {
+            pair.setPairStatus(PairStatus.REJECTED);
+        }
     }
 }

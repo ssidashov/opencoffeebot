@@ -25,4 +25,6 @@ public class RequestInfo {
     private Integer currentPersonCount;
 
     private Integer estimatedWaitSeconds;
+
+    private RequestStatusType requestStatusType;
 }

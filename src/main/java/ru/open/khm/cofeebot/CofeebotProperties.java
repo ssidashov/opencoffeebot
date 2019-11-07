@@ -10,4 +10,5 @@ public class CofeebotProperties {
     private double stagingWaitTimeMultiplier;
     private long timerDelay;
     private long pairAcceptTimeoutSeconds;
+    private long maxTimeoutCount;
 }
