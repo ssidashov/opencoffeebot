@@ -15,7 +15,7 @@ import java.util.OptionalInt;
 public class PartitionSelectServiceImpl implements PartitionSelectService {
 
     private final CofeebotProperties cofeebotProperties;
-    private static final int SCORE_TO_PROCESS = 50;
+    private static final int SCORE_TO_PROCESS = 100;
 
     public PartitionSelectServiceImpl(CofeebotProperties cofeebotProperties) {
         this.cofeebotProperties = cofeebotProperties;
@@ -45,10 +45,21 @@ public class PartitionSelectServiceImpl implements PartitionSelectService {
                 .findFirst()
                 .orElse(baseScoreToMatch);
 
+        long oldestWaitTimeSeconds = oldestCreated.until(Instant.now(), ChronoUnit.SECONDS);
         int currentScore = (int) (size * cofeebotProperties.getStagingPersonCountMultipler()
-                + oldestCreated.until(Instant.now(), ChronoUnit.SECONDS) * cofeebotProperties.getStagingWaitTimeMultiplier());
+                + oldestWaitTimeSeconds * cofeebotProperties.getStagingWaitTimeMultiplier());
+
+        int secondsToWaitEstimated = (int) ((float) (scoreToMatch - currentScore) / cofeebotProperties.getStagingWaitTimeMultiplier());
+        if(secondsToWaitEstimated < 0) {
+            secondsToWaitEstimated = 0;
+        }
+        setEstimatedOnRequests(locationPartition, secondsToWaitEstimated);
 
         log.debug("Partition location: " + locationPartition.getLocation() + ", current score:" + currentScore + ", score to match:" + scoreToMatch);
         return (currentScore >= scoreToMatch);
+    }
+
+    private void setEstimatedOnRequests(LocationPartition locationPartition, int secondsToWaitEstimated) {
+        locationPartition.getRequests().forEach(request -> request.setSecondsWaitEstimated(secondsToWaitEstimated));
     }
 }

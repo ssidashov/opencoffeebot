@@ -8,14 +8,17 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class ProcessRequestsTimerTask {
     private final RequestProcessingService requestProcessingService;
+    private final TimeoutRequestsService timeoutRequestsService;
 
-    public ProcessRequestsTimerTask(RequestProcessingService requestProcessingService) {
+    public ProcessRequestsTimerTask(RequestProcessingService requestProcessingService, TimeoutRequestsService timeoutRequestsService) {
         this.requestProcessingService = requestProcessingService;
+        this.timeoutRequestsService = timeoutRequestsService;
     }
 
     @Scheduled(fixedDelayString = "${cofeebot.timerDelay}")
     public void check() {
-        log.info("Timer accepted");
+        log.info("Timer fired");
         requestProcessingService.processRequests();
+        timeoutRequestsService.timeoutRequests();
     }
 }

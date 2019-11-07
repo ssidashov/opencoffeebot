@@ -19,14 +19,29 @@ public class RequestResource {
     }
 
     @PostMapping
-    public String createNew(@RequestBody RequestInput requestInput) {
-        return requestService.createNew(requestInput);
+    public ResponseEntity<String> createNew(@RequestBody RequestInput requestInput) {
+        try {
+            return ResponseEntity.ok(requestService.createNew(requestInput));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).header("Cause", e.getMessage()).build();
+        }
     }
 
     @PostMapping(path = "{id}/cancel")
-    public String cancel(@PathVariable String id) {
-        requestService.cancelRequest(id);
-        return id;
+    public ResponseEntity<String> cancel(@PathVariable String id) {
+        try {
+            requestService.cancelRequest(id);
+            return ResponseEntity.ok(id);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .header("Cause", e.getMessage())
+                    .build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .header("Cause", e.getMessage())
+                    .build();
+        }
+
     }
 
     @GetMapping(path = "{id}/status")

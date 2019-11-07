@@ -10,6 +10,7 @@ import ru.open.khm.cofeebot.repository.UserRepository;
 import ru.open.khm.cofeebot.rest.RequestInput;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -36,7 +37,7 @@ public class RequestServiceImpl implements RequestService {
         Optional<User> userByLogin = userRepository.findById(requestInput.getUserId());
         User user = userByLogin.orElseThrow(() -> new IllegalArgumentException("No user with id " + requestInput.getUserId()));
         Optional<Request> activeRequestByUser = requestRepository.getRequestByUser_IdEqualsAndRequestStatusTypeIn(user.getId()
-                , Collections.singletonList(RequestStatusType.CREATED));
+                , Arrays.asList(RequestStatusType.CREATED, RequestStatusType.PAIRED));
         activeRequestByUser.ifPresent(request -> {
             throw new IllegalArgumentException("Already registered request with id " + request.getId());
         });
@@ -88,7 +89,18 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public void rejectRequest(String id, RequestStatusType typeToReject) {
-
+        Optional<Request> byId = requestRepository.findById(id);
+        Request request = byId.orElseThrow(() -> new IllegalArgumentException("No request with id " + id));
+        if (request.getRequestStatusType() != RequestStatusType.PAIRED) {
+            throw new IllegalStateException("Cannot cancel already processed request");
+        }
+        Optional<Pair> pairExists = pairRepository.findByFirstRequestEqualsOrSecondRequestEquals(request, request);
+        pairExists.ifPresent(pair -> {
+            Optional<Request> requestToRenew = pairService.rejectByRequest(request, pair, RequestStatusType.REJECTED);
+            requestToRenew.ifPresent(this::renewRequest);
+        });
+        renewRequest(request);
+        request.setRequestStatusType(RequestStatusType.REJECTED);
     }
 
     @Override

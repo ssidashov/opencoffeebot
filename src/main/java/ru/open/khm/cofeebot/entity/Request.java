@@ -6,6 +6,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.Objects;
 
 @Entity
 @Data
@@ -40,8 +41,22 @@ public class Request {
 
     private Integer maxWaitSeconds;
     private Integer sameoLocationRequestCount;
+    private Integer secondsWaitEstimated;
 
     public void setActiveRequestStats(int size) {
         this.sameoLocationRequestCount = size;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Request request = (Request) o;
+        return id.equals(request.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

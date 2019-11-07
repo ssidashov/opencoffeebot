@@ -25,7 +25,7 @@ management:
 cofeebot:
   timerDelay: 15000
   stagingPersonCountMultipler: 20
-  stagingWaitTimeMultiplier: 0.5
+  stagingWaitTimeMultiplier: 0.1
   pairAcceptTimeoutSeconds: 60
 logging:
   level:
