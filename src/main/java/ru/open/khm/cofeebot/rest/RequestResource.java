@@ -68,6 +68,27 @@ public class RequestResource {
         }
     }
 
+    @PostMapping(path = "{id}/clearBlacklist")
+    public void clearBlacklist(String userId) {
+
+    }
+
+    @PostMapping(path = "{id}/rejectBlacklist")
+    public ResponseEntity<String> rejectBlackList(@PathVariable String id) {
+        try {
+            requestService.rejectRequest(id, RequestStatusType.REJECTED_BLACKLIST);
+            return ResponseEntity.ok(id);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .header("Cause", e.getMessage())
+                    .build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .header("Cause", e.getMessage())
+                    .build();
+        }
+    }
+
     @PostMapping(path = "{id}/accept")
     public ResponseEntity<String> accept(@PathVariable String id) {
         try {

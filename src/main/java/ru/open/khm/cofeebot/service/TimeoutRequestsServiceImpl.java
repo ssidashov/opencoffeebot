@@ -25,6 +25,7 @@ public class TimeoutRequestsServiceImpl implements TimeoutRequestsService {
     private final RequestRepository requestRepository;
     private final PairRepository pairRepository;
     private final CofeebotProperties cofeebotProperties;
+    private final TelegramService telegramService;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -32,11 +33,13 @@ public class TimeoutRequestsServiceImpl implements TimeoutRequestsService {
     public TimeoutRequestsServiceImpl(RequestService requestService
             , RequestRepository requestRepository
             , PairRepository pairRepository
-            , CofeebotProperties cofeebotProperties) {
+            , CofeebotProperties cofeebotProperties
+            , TelegramService telegramService) {
         this.requestService = requestService;
         this.requestRepository = requestRepository;
         this.pairRepository = pairRepository;
         this.cofeebotProperties = cofeebotProperties;
+        this.telegramService = telegramService;
     }
 
     @Override
@@ -70,5 +73,6 @@ public class TimeoutRequestsServiceImpl implements TimeoutRequestsService {
 
     private void timeoutRequest(Request request, Pair pair) {
         requestService.rejectRequest(request.getId(), RequestStatusType.ACCEPT_TIMED_OUT);
+        telegramService.notifyTimeoutFired(request, pair);
     }
 }

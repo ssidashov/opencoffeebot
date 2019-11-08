@@ -17,6 +17,9 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Override
     public String register(User userRegistration) {
+        if (userRegistration.getTelegramAccount() != null) {
+            userRegistration.setTelegramAccount(userRegistration.getTelegramAccount().toUpperCase());
+        }
         Optional<User> foundRegistered = userRepository.getByLogin(userRegistration.getLogin());
         return foundRegistered.map(user -> {
             userRegistration.setId(user.getId());

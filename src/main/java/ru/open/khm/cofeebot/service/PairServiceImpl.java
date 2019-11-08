@@ -15,12 +15,14 @@ import java.util.Optional;
 @Slf4j
 public class PairServiceImpl implements PairService {
     private final PairRepository pairRepository;
+    private final TelegramService telegramService;
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    public PairServiceImpl(PairRepository pairRepository) {
+    public PairServiceImpl(PairRepository pairRepository, TelegramService telegramService) {
         this.pairRepository = pairRepository;
+        this.telegramService = telegramService;
     }
 
     @Override
@@ -63,6 +65,9 @@ public class PairServiceImpl implements PairService {
         pairRepository.save(pair);
         request1.setRequestStatusType(RequestStatusType.PAIRED);
         request2.setRequestStatusType(RequestStatusType.PAIRED);
+
+        telegramService.pairCreatedNotify(pair);
+
         return pair;
     }
 
@@ -85,6 +90,7 @@ public class PairServiceImpl implements PairService {
             return;
         }
         if (otherState == PairDecision.ACCEPTED) {
+            telegramService.pairAcceptedNotify(pair);
             pair.setPairStatus(PairStatus.ACCEPTED);
         } else {
             pair.setPairStatus(PairStatus.REJECTED);

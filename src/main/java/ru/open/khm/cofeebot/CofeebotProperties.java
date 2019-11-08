@@ -11,4 +11,6 @@ public class CofeebotProperties {
     private long timerDelay;
     private long pairAcceptTimeoutSeconds;
     private long maxTimeoutCount;
+    private String botName;
+    private String botToken;
 }

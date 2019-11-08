@@ -1,9 +1,11 @@
 package ru.open.khm.cofeebot.service;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.open.khm.cofeebot.entity.*;
+import ru.open.khm.cofeebot.repository.BlacklistRepository;
 import ru.open.khm.cofeebot.repository.PairRepository;
 import ru.open.khm.cofeebot.repository.RequestRepository;
 import ru.open.khm.cofeebot.repository.UserRepository;
@@ -11,24 +13,31 @@ import ru.open.khm.cofeebot.rest.RequestInput;
 
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
     private final UserRepository userRepository;
     private final PairRepository pairRepository;
     private final PairService pairService;
+    private final BlacklistRepository blacklistRepository;
+    private final TelegramService telegramService;
 
     public RequestServiceImpl(RequestRepository requestRepository
             , UserRepository userRepository
             , PairRepository pairRepository
-            , PairService pairService) {
+            , PairService pairService
+            , BlacklistRepository blacklistRepository
+            , TelegramService telegramService) {
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
         this.pairRepository = pairRepository;
         this.pairService = pairService;
+        this.blacklistRepository = blacklistRepository;
+        this.telegramService = telegramService;
     }
 
     @Override
@@ -53,6 +62,14 @@ public class RequestServiceImpl implements RequestService {
         request.setMaxWaitSeconds(requestInput.getMaxWaitTime());
 
         Request saved = requestRepository.save(request);
+
+        if (user.getTelegramAccount() != null) {
+            try {
+                telegramService.sendRequestCreated(request, user);
+            } catch (Exception e) {
+                log.error("Cannot notify by telegram");
+            }
+        }
 
         return saved.getId();
     }
@@ -100,9 +117,27 @@ public class RequestServiceImpl implements RequestService {
         pairExists.ifPresent(pair -> {
             Optional<Request> requestToRenew = pairService.rejectByRequest(request, pair, typeToReject);
             requestToRenew.ifPresent(this::renewRequest);
+            requestToRenew.ifPresent(telegramService::notifyOtherRejected);
+            if (typeToReject == RequestStatusType.REJECTED_BLACKLIST) {
+                addToBlackList(request, pair);
+            }
         });
-        renewRequest(request);
+        if (typeToReject != RequestStatusType.CANCELLED) {
+            renewRequest(request);
+        }
         request.setRequestStatusType(typeToReject);
+    }
+
+    private void addToBlackList(Request request, Pair pair) {
+        boolean isFirst = pair.getFirstRequest() == request;
+
+        User you = isFirst ? pair.getFirstRequest().getUser() : pair.getSecondRequest().getUser();
+        User other = isFirst ? pair.getSecondRequest().getUser() : pair.getFirstRequest().getUser();
+        BlackListRecord record = new BlackListRecord();
+        record.setBlacklistTime(Instant.now());
+        record.setIssuer(you);
+        record.setBlacklisted(other);
+        blacklistRepository.save(record);
     }
 
     @Override
@@ -176,6 +211,19 @@ public class RequestServiceImpl implements RequestService {
             current = current.getOriginal();
         }
         return countTimeout;
+    }
+
+    @Override
+    public Optional<Request> getInProcessRequestByUserId(String id) {
+        Optional<User> one = userRepository.findById(id);
+        return one.flatMap(user -> requestRepository.findByUserAndStatus(user, List.of(RequestStatusType.CREATED, RequestStatusType.PAIRED))
+                .stream().findFirst());
+    }
+
+    @Override
+    public Optional<Request> getCurrentRequest(String id) {
+        Optional<User> one = userRepository.findById(id);
+        return one.flatMap(user -> requestRepository.findTopByUserEqualsCreateTime(user).stream().findFirst());
     }
 
     private RequestInfo requestInfoFromRequest(Request request) {

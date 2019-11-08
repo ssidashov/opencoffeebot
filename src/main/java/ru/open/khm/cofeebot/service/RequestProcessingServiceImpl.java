@@ -39,7 +39,7 @@ public class RequestProcessingServiceImpl implements RequestProcessingService {
         if (locationPartition.getRequests().size() % 2 != 0) {
             Request request = locationPartition.getRequests()
                     .stream()
-                    .max(Comparator.comparing(Request::getOriginalCreated))
+                    .max(Comparator.comparing(Request::getCreateTime))
                     .orElseThrow(() -> new IllegalStateException("Wrong size of partition"));
             locationPartition.getRequests().remove(request);
         }

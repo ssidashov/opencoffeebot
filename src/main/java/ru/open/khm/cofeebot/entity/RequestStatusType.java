@@ -5,6 +5,7 @@ public enum RequestStatusType {
     , PAIRED(false, null)
     , CANCELLED(true, PairDecision.REJECTED)
     , REJECTED(true, PairDecision.REJECTED)
+    , REJECTED_BLACKLIST(true, PairDecision.REJECTED)
     , ACCEPTED(true, PairDecision.ACCEPTED)
     , ACCEPT_TIMED_OUT(true, PairDecision.REJECTED_TIMEOUT)
     , SKIPPED(true, PairDecision.REJECTED);
