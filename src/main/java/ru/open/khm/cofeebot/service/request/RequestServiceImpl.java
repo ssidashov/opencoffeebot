@@ -126,10 +126,23 @@ public class RequestServiceImpl implements RequestService {
                 addToBlackList(request, pair);
             }
         });
-        if (typeToReject != RequestStatusType.CANCELLED) {
+        if (typeToReject != RequestStatusType.CANCELLED && (!isTimedOut5Count(request, typeToReject))) {
             renewRequest(request);
         }
         request.setRequestStatusType(typeToReject);
+    }
+
+    private boolean isTimedOut5Count(Request request, RequestStatusType typeToReject) {
+        if (typeToReject != RequestStatusType.ACCEPT_TIMED_OUT) {
+            return false;
+        }
+
+        int parentCountByStatus = getParentCountByStatus(request, RequestStatusType.ACCEPT_TIMED_OUT);
+        boolean isNeedCancel = parentCountByStatus >= 5;
+        if (isNeedCancel) {
+            log.debug("Max timeout count on request not expired:" + parentCountByStatus + ", retrying");
+        }
+        return isNeedCancel;
     }
 
     private void addToBlackList(Request request, Pair pair) {
@@ -170,7 +183,9 @@ public class RequestServiceImpl implements RequestService {
         }
         if (request.getRequestStatusType() == RequestStatusType.ACCEPT_TIMED_OUT) {
             Request finalChild = getFinalChild(request);
-            throw new AcceptTimedOutException(finalChild.getId());
+            if (finalChild != request) {
+                throw new AcceptTimedOutException(finalChild.getId());
+            }
         }
         boolean yourAccepted = request.getRequestStatusType() != RequestStatusType.CREATED;
         Optional<Pair> requestPair = pairRepository.findByFirstRequestEqualsOrSecondRequestEquals(request, request);

@@ -65,9 +65,6 @@ public class TimeoutRequestsServiceImpl implements TimeoutRequestsService {
                         log.debug("Timing out request " + request);
                         timeoutRequest(request, pair);
                         int parentCountByStatus = requestService.getParentCountByStatus(request, RequestStatusType.ACCEPT_TIMED_OUT);
-                        if (parentCountByStatus < cofeebotProperties.getMaxTimeoutCount()) {
-                            log.debug("Max timeout count on request not expired:" + parentCountByStatus + ", retrying");
-                        }
                     }
                 });
     }

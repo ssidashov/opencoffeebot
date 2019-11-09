@@ -12,4 +12,7 @@ public interface BlacklistRepository extends JpaRepository<BlackListRecord, Stri
 
     @Query("select count(p) from BlackListRecord p where (p.issuer = :user1 and p.blacklisted = :user2) or (p.issuer = :user2 and p.blacklisted = :user1)")
     int countByIssuerAndBlacklistedOrReverse(User user1, User user2);
+
+    @Query("select r from BlackListRecord r where r.issuer.id = :userId")
+    List<BlackListRecord> findByUserId(String userId);
 }
