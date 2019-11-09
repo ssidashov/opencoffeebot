@@ -5,6 +5,8 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import ru.open.khm.cofeebot.entity.Request;
+import ru.open.khm.cofeebot.exception.AlgorithmException;
+import ru.open.khm.cofeebot.exception.StableNotPossibleException;
 
 import java.util.*;
 import java.util.stream.Collectors;

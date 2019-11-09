@@ -1,4 +1,4 @@
-package ru.open.khm.cofeebot.service;
+package ru.open.khm.cofeebot.exception;
 
 public class AlgorithmException extends RuntimeException {
     public AlgorithmException(String message) {

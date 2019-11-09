@@ -6,6 +6,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import ru.open.khm.cofeebot.entity.*;
+import ru.open.khm.cofeebot.exception.StableNotPossibleException;
 import ru.open.khm.cofeebot.repository.BlacklistRepository;
 import ru.open.khm.cofeebot.repository.PairRepository;
 import ru.open.khm.cofeebot.repository.RequestRepository;

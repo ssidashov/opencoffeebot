@@ -8,7 +8,7 @@ import ru.open.khm.cofeebot.entity.RequestStatus;
 import ru.open.khm.cofeebot.entity.RequestStatusType;
 import ru.open.khm.cofeebot.service.request.AcceptTimedOutException;
 import ru.open.khm.cofeebot.service.request.RequestService;
-import ru.open.khm.cofeebot.service.request.SkippedException;
+import ru.open.khm.cofeebot.exception.SkippedException;
 
 import java.util.HashMap;
 import java.util.Map;
