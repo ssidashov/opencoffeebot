@@ -1,5 +1,6 @@
 package ru.open.khm.cofeebot.service.request;
 
+import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -59,7 +60,7 @@ public class RequestServiceImpl implements RequestService {
         Request request = new Request();
         request.setUser(user);
         request.setLocation(user.getLocation());
-        request.setPlace(requestInput.isMyPlace() ? user.getWorkplace() + " " + user.getLocation() : user.getLocation());
+        request.setPlace(requestInput.isMyPlace() ? Strings.nullToEmpty(user.getWorkplace()) + " " + user.getLocation() : user.getLocation());
         request.setCanPay(requestInput.isCanPay());
         request.setCreateTime(now);
         request.setOriginalCreated(now);
@@ -163,7 +164,7 @@ public class RequestServiceImpl implements RequestService {
         Optional<Request> byId = requestRepository.findById(id);
         Request request = byId.orElseThrow(() -> new IllegalArgumentException("No request with id " + id));
         if (request.getRequestStatusType() != RequestStatusType.PAIRED) {
-            throw new IllegalStateException("Request status is not paird: " + request.getRequestStatusType());
+            throw new IllegalStateException("Request status is not pair: " + request.getRequestStatusType());
         }
         request.setRequestStatusType(RequestStatusType.ACCEPTED);
         Optional<Pair> pairExists = pairRepository.findByFirstRequestEqualsOrSecondRequestEquals(request, request);
@@ -178,14 +179,18 @@ public class RequestServiceImpl implements RequestService {
         Optional<Request> byId = requestRepository.findById(id);
         Request request = byId.orElseThrow(() -> new IllegalArgumentException("No request with id " + id));
         if (request.getRequestStatusType() == RequestStatusType.SKIPPED) {
-            Request finalChild = getFinalChild(request);
+            Request finalChild = getFinalChild(request, RequestStatusType.SKIPPED);
             throw new SkippedException(finalChild.getId());
         }
         if (request.getRequestStatusType() == RequestStatusType.ACCEPT_TIMED_OUT) {
-            Request finalChild = getFinalChild(request);
-            if (finalChild != request) {
+            Request finalChild = getFinalChild(request, RequestStatusType.ACCEPT_TIMED_OUT);
+            if (finalChild == request) {
                 throw new AcceptTimedOutException(finalChild.getId());
             }
+        }
+        Request finalChild = getFinalChild(request);
+        if (finalChild != request) {
+            throw new SkippedException(finalChild.getId());
         }
         boolean yourAccepted = request.getRequestStatusType() != RequestStatusType.CREATED;
         Optional<Pair> requestPair = pairRepository.findByFirstRequestEqualsOrSecondRequestEquals(request, request);
@@ -203,11 +208,23 @@ public class RequestServiceImpl implements RequestService {
         return status;
     }
 
-    private Request getFinalChild(Request request) {
+    private Request getFinalChild(Request request, RequestStatusType requestStatusType) {
         Request current = request;
-        while (current.getRequestStatusType() == RequestStatusType.SKIPPED) {
+        while (current.getRequestStatusType() == requestStatusType) {
             Optional<Request> requestByOriginalEquals = requestRepository.getRequestByOriginalEquals(current);
             current = requestByOriginalEquals.orElseThrow(() -> new IllegalStateException("No non-skiped status child"));
+        }
+        return current;
+    }
+
+    private Request getFinalChild(Request request) {
+        Request current = request;
+        while (true) {
+            Optional<Request> requestByOriginalEquals = requestRepository.getRequestByOriginalEquals(current);
+            if (requestByOriginalEquals.isEmpty()) {
+                break;
+            }
+            current = requestByOriginalEquals.get();
         }
         return current;
     }
@@ -251,6 +268,7 @@ public class RequestServiceImpl implements RequestService {
 
     private RequestInfo requestInfoFromRequest(Request request) {
         RequestInfo requestInfo = new RequestInfo();
+        requestInfo.setId(request.getId());
         requestInfo.setPlace(request.getPlace());
         requestInfo.setMyPlace(request.isMyPlace());
         requestInfo.setCreateTime(request.getCreateTime());

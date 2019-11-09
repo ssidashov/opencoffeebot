@@ -156,7 +156,7 @@ public class TelegramServiceImpl implements TelegramService {
             StringBuilder sb = new StringBuilder();
             sb.append("Пара согласована!");
             if (secondRequest.getUser().getTelegramAccount() != null) {
-                sb.append("Теперь вы и " + getUserDescription(secondRequest.getUser()) + " можете переписываться, посылая сообщения в чат!");
+                sb.append("Теперь вы и " + getUserDescription(secondRequest.getUser()) + " можете переписываться, посылая сообщения в чат! ");
             }
             sb.append("Приятного аппетита!");
             method.setText(sb.toString());

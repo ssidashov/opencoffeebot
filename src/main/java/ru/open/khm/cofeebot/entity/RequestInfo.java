@@ -8,6 +8,8 @@ import java.time.Instant;
 
 @Data
 public class RequestInfo {
+    private String id;
+
     private Instant createTime;
 
     private Instant originalCreated;

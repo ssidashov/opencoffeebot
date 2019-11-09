@@ -18,11 +18,9 @@ import java.util.Map;
 public class RequestResource {
 
     private final RequestService requestService;
-    private final BlackListService blackListService;
 
     public RequestResource(RequestService requestService, BlackListService blackListService) {
         this.requestService = requestService;
-        this.blackListService = blackListService;
     }
 
     @PostMapping
@@ -69,11 +67,6 @@ public class RequestResource {
                     .header("Cause", e.getMessage())
                     .build();
         }
-    }
-
-    @PostMapping(path = "{id}/clearBlacklist")
-    public void clearBlacklist(String userId) {
-        blackListService.clearByUser(userId);
     }
 
     @PostMapping(path = "{id}/rejectBlacklist")

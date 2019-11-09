@@ -9,7 +9,7 @@ spring:
       enabled: true
   datasource:
     url:
-      jdbc:h2:file:~/cofeebot-data
+      jdbc:h2:file:~/cofeebot-data;AUTO_SERVER=TRUE
   jpa:
     hibernate:
       ddl-auto: update
@@ -24,8 +24,8 @@ management:
 cofeebot:
   timerDelay: 15000
   stagingPersonCountMultipler: 20
-  stagingWaitTimeMultiplier: 1
-  pairAcceptTimeoutSeconds: 20
+  stagingWaitTimeMultiplier: 0.5
+  pairAcceptTimeoutSeconds: 60
   maxTimeoutCount: 5
   botToken: 1025153365:AAF4pPmtoWxEDNZAgFi7JvT12NnQK2vfrA4
   botName: openmdm_coffee_bot
