@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.open.khm.cofeebot.entity.RequestStatus;
 import ru.open.khm.cofeebot.entity.RequestStatusType;
-import ru.open.khm.cofeebot.service.request.AcceptTimedOutException;
+import ru.open.khm.cofeebot.exception.AcceptTimedOutException;
 import ru.open.khm.cofeebot.service.request.RequestService;
 import ru.open.khm.cofeebot.exception.SkippedException;
 

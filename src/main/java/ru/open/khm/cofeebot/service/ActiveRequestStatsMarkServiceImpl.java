@@ -18,7 +18,7 @@ public class ActiveRequestStatsMarkServiceImpl implements ActiveRequestStatsMark
             if (size == 1) {
                 request.setSecondsWaitEstimated(null);
             }
-            telegramService.notifyWaiting(request);
+            telegramService.notifyWaiting(request, size);
         });
     }
 }

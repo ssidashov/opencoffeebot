@@ -106,7 +106,7 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     @Override
-    public void notifyWaiting(Request request) {
+    public void notifyWaiting(Request request, int size) {
         String telegramAccount = request.getUser().getTelegramAccount();
         if (telegramAccount != null) {
             telegramAccount = telegramAccount.toUpperCase();
@@ -114,6 +114,16 @@ public class TelegramServiceImpl implements TelegramService {
         Integer userId = telegramUserIdsByUserNames.get(telegramAccount);
         if (null == userId) {
             return;
+        }
+        if (size == 1) {
+            SendMessage method = new SendMessage();
+            method.setChatId(userId.longValue());
+            method.setText("Пока никого нет рядом с вами, подождем.");
+            try {
+                telegramBot.execute(method);
+            } catch (TelegramApiException e) {
+                log.error("Cannot send to telegram", e);
+            }
         }
         if (request.getSecondsWaitEstimated() != null && request.getSecondsWaitEstimated() != 0) {
             int seconds = (request.getSecondsWaitEstimated() / 5) * 5;

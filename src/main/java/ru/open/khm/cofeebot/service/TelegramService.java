@@ -17,7 +17,7 @@ public interface TelegramService {
 
     void notifyTimeoutFired(Request request, Pair pair);
 
-    void notifyWaiting(Request request);
+    void notifyWaiting(Request request, int size);
 
     void pairAcceptedNotify(Pair pair);
 

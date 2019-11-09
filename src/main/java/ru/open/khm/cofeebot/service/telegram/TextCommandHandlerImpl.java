@@ -28,6 +28,9 @@ public class TextCommandHandlerImpl implements TextCommandHandler {
     @Override
     @Transactional
     public void handle(Update update, Consumer<SendMessage> sender) {
+        if (update.getMessage() == null) {
+            return;
+        }
         Request currentRequest = getCurrentRequest(update.getMessage().getFrom());
         boolean waitDecision = isWaitDecision(currentRequest);
         if (waitDecision) {
