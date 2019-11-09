@@ -9,7 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import ru.open.khm.cofeebot.entity.Request;
 import ru.open.khm.cofeebot.repository.UserRepository;
-import ru.open.khm.cofeebot.service.RequestService;
+import ru.open.khm.cofeebot.service.request.RequestService;
 import ru.open.khm.cofeebot.service.TelegramService;
 
 import java.util.Optional;

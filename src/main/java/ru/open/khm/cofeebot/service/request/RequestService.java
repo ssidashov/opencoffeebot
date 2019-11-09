@@ -1,11 +1,10 @@
-package ru.open.khm.cofeebot.service;
+package ru.open.khm.cofeebot.service.request;
 
 import ru.open.khm.cofeebot.entity.Request;
 import ru.open.khm.cofeebot.entity.RequestStatus;
 import ru.open.khm.cofeebot.entity.RequestStatusType;
 import ru.open.khm.cofeebot.rest.RequestInput;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface RequestService {

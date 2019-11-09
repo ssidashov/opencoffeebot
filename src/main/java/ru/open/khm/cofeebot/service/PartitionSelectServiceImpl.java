@@ -5,6 +5,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import ru.open.khm.cofeebot.CofeebotProperties;
 import ru.open.khm.cofeebot.entity.Request;
+import ru.open.khm.cofeebot.service.request.RequestService;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;

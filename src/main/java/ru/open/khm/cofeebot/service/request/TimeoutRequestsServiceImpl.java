@@ -1,4 +1,4 @@
-package ru.open.khm.cofeebot.service;
+package ru.open.khm.cofeebot.service.request;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -9,6 +9,7 @@ import ru.open.khm.cofeebot.entity.Request;
 import ru.open.khm.cofeebot.entity.RequestStatusType;
 import ru.open.khm.cofeebot.repository.PairRepository;
 import ru.open.khm.cofeebot.repository.RequestRepository;
+import ru.open.khm.cofeebot.service.TelegramService;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;

@@ -2,13 +2,12 @@ package ru.open.khm.cofeebot.service.telegram;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
-import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import ru.open.khm.cofeebot.entity.Request;
-import ru.open.khm.cofeebot.service.RequestService;
+import ru.open.khm.cofeebot.service.request.RequestService;
 import ru.open.khm.cofeebot.service.TelegramService;
 
 import java.util.Optional;

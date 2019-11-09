@@ -11,7 +11,7 @@ import ru.open.khm.cofeebot.entity.PairStatus;
 import ru.open.khm.cofeebot.entity.Request;
 import ru.open.khm.cofeebot.entity.RequestStatusType;
 import ru.open.khm.cofeebot.repository.PairRepository;
-import ru.open.khm.cofeebot.service.RequestService;
+import ru.open.khm.cofeebot.service.request.RequestService;
 import ru.open.khm.cofeebot.service.TelegramService;
 
 import java.util.Optional;

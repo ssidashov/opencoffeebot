@@ -1,4 +1,4 @@
-package ru.open.khm.cofeebot.service;
+package ru.open.khm.cofeebot.service.request;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +10,8 @@ import ru.open.khm.cofeebot.repository.PairRepository;
 import ru.open.khm.cofeebot.repository.RequestRepository;
 import ru.open.khm.cofeebot.repository.UserRepository;
 import ru.open.khm.cofeebot.rest.RequestInput;
+import ru.open.khm.cofeebot.service.PairService;
+import ru.open.khm.cofeebot.service.TelegramService;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -163,6 +165,10 @@ public class RequestServiceImpl implements RequestService {
         if (request.getRequestStatusType() == RequestStatusType.SKIPPED) {
             Request finalChild = getFinalChild(request);
             throw new SkippedException(finalChild.getId());
+        }
+        if (request.getRequestStatusType() == RequestStatusType.ACCEPT_TIMED_OUT) {
+            Request finalChild = getFinalChild(request);
+            throw new AcceptTimedOutException(finalChild.getId());
         }
         boolean yourAccepted = request.getRequestStatusType() != RequestStatusType.CREATED;
         Optional<Pair> requestPair = pairRepository.findByFirstRequestEqualsOrSecondRequestEquals(request, request);

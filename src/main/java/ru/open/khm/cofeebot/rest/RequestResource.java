@@ -6,8 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.open.khm.cofeebot.entity.RequestStatus;
 import ru.open.khm.cofeebot.entity.RequestStatusType;
-import ru.open.khm.cofeebot.service.RequestService;
-import ru.open.khm.cofeebot.service.SkippedException;
+import ru.open.khm.cofeebot.service.request.AcceptTimedOutException;
+import ru.open.khm.cofeebot.service.request.RequestService;
+import ru.open.khm.cofeebot.service.request.SkippedException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -112,6 +113,9 @@ public class RequestResource {
         } catch (SkippedException e) {
             return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
                     .header(HttpHeaders.LOCATION, "/api/request/" + e.getNewId() + "/status").build();
+        } catch (AcceptTimedOutException e) {
+            return ResponseEntity.status(HttpStatus.GONE)
+                    .header(HttpHeaders.LOCATION, "/api/request/" + e.getId() + "/status").build();
         }
     }
 }

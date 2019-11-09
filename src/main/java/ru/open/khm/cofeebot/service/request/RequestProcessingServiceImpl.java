@@ -1,8 +1,9 @@
-package ru.open.khm.cofeebot.service;
+package ru.open.khm.cofeebot.service.request;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.open.khm.cofeebot.entity.Request;
+import ru.open.khm.cofeebot.service.*;
 
 import java.util.Comparator;
 import java.util.List;

@@ -1,4 +1,4 @@
-package ru.open.khm.cofeebot.service;
+package ru.open.khm.cofeebot.service.request;
 
 public class SkippedException extends Exception {
     private final String newId;
