@@ -36,7 +36,7 @@ public class StartCommand extends ChatBotCommand {
         String userIdByTelegramUser = getTelegramService().getUserIdByTelegramUser(user.getUserName());
         if (null != userIdByTelegramUser) {
             ru.open.khm.cofeebot.entity.User cofeebotUser = context.getBean(UserRepository.class).findById(userIdByTelegramUser).orElseThrow(() -> new IllegalArgumentException("No user for user"));
-            username = Strings.nullToEmpty(cofeebotUser.getFirstname() + " " + cofeebotUser.getMiddlename() + " " + cofeebotUser.getLastname());
+            username = Strings.nullToEmpty(cofeebotUser.getFirstname()) + " " + Strings.nullToEmpty(cofeebotUser.getMiddlename()) + " " + Strings.nullToEmpty(cofeebotUser.getLastname());
             Optional<Request> requestByUserId = getRequestService().getInProcessRequestByUserId(userIdByTelegramUser);
             if (requestByUserId.isPresent()) {
                 isRequestActive = true;
