@@ -16,26 +16,29 @@ import java.util.Optional;
 
 @Slf4j
 public class CreateRequestCommand extends ChatBotCommand  {
-    private final ApplicationContext context;
+    private final TelegramService telegramService;
+    private final UserRepository userRepository;
+    private RequestService requestService;
 
-    public CreateRequestCommand(ApplicationContext context) {
+    public CreateRequestCommand(TelegramService telegramService
+            , UserRepository userRepository
+            , RequestService requestService) {
         super("iwantcoffee", "Create request for pair");
-        this.context = context;
+        this.telegramService = telegramService;
+        this.userRepository = userRepository;
+        this.requestService = requestService;
     }
 
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
-        TelegramService telegramService = getTelegramService();
         log.info("User " + user.getUserName());
         telegramService.registerUserLink(user);
         String userName = user.getUserName();
-        String userIdByTelegramUser = getTelegramService().getUserIdByTelegramUser(userName);
-        UserRepository userRepository = context.getBean(UserRepository.class);
+        String userIdByTelegramUser = telegramService.getUserIdByTelegramUser(userName);
         if (null == userIdByTelegramUser) {
             sentNoUser(chat, absSender, user);
             return;
         }
-        RequestService requestService = getRequestService();
         Optional<Request> requestByUserId = requestService.getInProcessRequestByUserId(userIdByTelegramUser);
         requestByUserId.ifPresent(request -> {
             sentAlreadyHasRequest(chat, absSender, user);
@@ -61,13 +64,5 @@ public class CreateRequestCommand extends ChatBotCommand  {
         message.setChatId(chat.getId().toString());
         message.setText("Мы не знаем кто вы! Пожалайста, зарегистрируйтесть на https://net.open.ru");
         execute(absSender, message, user);
-    }
-
-    private TelegramService getTelegramService() {
-        return context.getBean(TelegramService.class);
-    }
-
-    private RequestService getRequestService() {
-        return context.getBean(RequestService.class);
     }
 }
