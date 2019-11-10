@@ -1,0 +1,39 @@
+{
+    "name": "OpenCoffee",
+    "version": "1.0",
+    "description": "Выпей кофе с коллегой!",
+    "permissions": ["activeTab", "declarativeContent", "storage",
+        "https://rumskapp227.open.ru/",
+        "https://portalfc/",
+        "https://cofeebot-balancer-1645269137.us-west-2.elb.amazonaws.com/",
+        "http://ec2-35-160-232-7.us-west-2.compute.amazonaws.com:8080/"
+    ],
+    "options_page": "options.html",
+    "background": {
+        "scripts": ["jquery.js", "background.js"],
+        "persistent": false
+    },
+    "content_scripts": [{
+            "matches": ["http://net.open.ru/*", "https://net.open.ru/*"],
+            "css": ["style/jquery-ui.structure.min.css", "style/jquery-ui.theme.min.css"],
+            "js": ["jquery.js", "jquery-ui.min.js", "content.js"]
+        }],
+    "browser_action": {
+        "default_icon": {                    
+            "16": "images/coffee16.png",
+            "32": "images/coffee32.png",
+            "48": "images/coffee48.png",
+            "128": "images/coffee128.png"         
+        },
+        "default_title": "GrabCoffee",    
+        "default_popup": "popup.html"        
+    },
+    "icons": {
+        "16": "images/coffee16.png",
+        "32": "images/coffee32.png",
+        "48": "images/coffee48.png",
+        "128": "images/coffee128.png"
+    },
+    "web_accessible_resources": ["images/coffee32.png", "images/coffee32b.png"],
+    "manifest_version": 2
+}
