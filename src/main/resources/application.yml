@@ -27,8 +27,8 @@ cofeebot:
   stagingWaitTimeMultiplier: 0.5
   pairAcceptTimeoutSeconds: 60
   maxTimeoutCount: 5
-  botToken: 1025153365:AAF4pPmtoWxEDNZAgFi7JvT12NnQK2vfrA4
-  botName: openmdm_coffee_bot
+  botToken:
+  botName:
 logging:
   level:
     ru.open.khm.cofeebot: debug
