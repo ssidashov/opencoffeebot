@@ -1,7 +1,6 @@
 package ru.open.khm.cofeebot;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,50 +8,36 @@ import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.ApiContext;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
-import ru.open.khm.cofeebot.repository.PairRepository;
-import ru.open.khm.cofeebot.service.TelegramService;
-import ru.open.khm.cofeebot.service.request.RequestService;
 import ru.open.khm.cofeebot.service.telegram.*;
+
+import java.util.function.Supplier;
 
 @Configuration
 @Slf4j
 public class TelegramConfiguration {
-    @Autowired
-    private final ApplicationContext applicationContext;
     private final CofeebotProperties cofeebotProperties;
+    private final ApplicationContext applicationContext;
 
-    public TelegramConfiguration(ApplicationContext applicationContext
-            , CofeebotProperties cofeebotProperties) {
-        this.applicationContext = applicationContext;
+    public TelegramConfiguration(CofeebotProperties cofeebotProperties, ApplicationContext applicationContext) {
         this.cofeebotProperties = cofeebotProperties;
+        this.applicationContext = applicationContext;
     }
 
     @Bean
     public TelegramBot telegramBot() {
-        try {
-            log.info("Initializing API context...");
-            ApiContextInitializer.init();
+        log.info("Initializing API context...");
+        ApiContextInitializer.init();
 
-            TelegramBotsApi botsApi = new TelegramBotsApi();
+        TelegramBotsApi botsApi = new TelegramBotsApi();
 
-            log.info("Configuring bot options...");
-            DefaultBotOptions botOptions = ApiContext.getInstance(DefaultBotOptions.class);
+        log.info("Configuring bot options...");
+        DefaultBotOptions botOptions = ApiContext.getInstance(DefaultBotOptions.class);
 
-
-            log.info("Registering TelegramBot...");
-            TelegramBot bot = new TelegramBot(botOptions, textCommandHandler(), cofeebotProperties);
-            CommandFactory commandFactory = commandFactory();
-            bot.register(commandFactory.createStartCommand());
-            bot.register(commandFactory.createCancelCommand());
-            bot.register(commandFactory.createCreateRequestCommand());
-            botsApi.registerBot(bot);
-
-            log.info("TelegramBot bot is ready for work!");
-            return bot;
-        } catch (TelegramApiRequestException e) {
-            throw new RuntimeException(e);
-        }
+        return new TelegramBot(botOptions
+                , commandFactorySupplier()
+                , this::textCommandHandler
+                , botsApi
+                , cofeebotProperties);
     }
 
     @Bean
@@ -61,7 +46,7 @@ public class TelegramConfiguration {
     }
 
     @Bean
-    public CommandFactory commandFactory() {
-        return new CommandFactoryImpl();
+    public Supplier<CommandFactory> commandFactorySupplier() {
+        return () -> applicationContext.getBean(CommandFactory.class);
     }
 }

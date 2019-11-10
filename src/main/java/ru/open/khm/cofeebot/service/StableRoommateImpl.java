@@ -11,6 +11,10 @@ import ru.open.khm.cofeebot.exception.StableNotPossibleException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Stable roommmate problem decision implementation.
+ * https://en.wikipedia.org/wiki/Stable_roommates_problem
+ */
 @Service
 @Slf4j
 public class StableRoommateImpl implements StableRoommate {

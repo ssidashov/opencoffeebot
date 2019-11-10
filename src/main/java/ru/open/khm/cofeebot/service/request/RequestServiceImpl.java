@@ -3,6 +3,7 @@ package ru.open.khm.cofeebot.service.request;
 import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.open.khm.cofeebot.entity.*;
@@ -29,20 +30,20 @@ public class RequestServiceImpl implements RequestService {
     private final PairRepository pairRepository;
     private final PairService pairService;
     private final BlacklistRepository blacklistRepository;
-    private final TelegramService telegramService;
+
+    @Autowired
+    private TelegramService telegramService;
 
     public RequestServiceImpl(RequestRepository requestRepository
             , UserRepository userRepository
             , PairRepository pairRepository
             , PairService pairService
-            , BlacklistRepository blacklistRepository
-            , TelegramService telegramService) {
+            , BlacklistRepository blacklistRepository) {
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
         this.pairRepository = pairRepository;
         this.pairService = pairService;
         this.blacklistRepository = blacklistRepository;
-        this.telegramService = telegramService;
     }
 
     @Override
@@ -306,6 +307,10 @@ public class RequestServiceImpl implements RequestService {
 
             return new PairStatusData(buddyDescriptionCreated, yourDecision, pair.getPairStatus());
         }).orElse(new PairStatusData(null, null, null));
+    }
+
+    public void setTelegramService(TelegramService telegramService) {
+        this.telegramService = telegramService;
     }
 
     @Data

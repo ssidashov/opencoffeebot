@@ -131,4 +131,16 @@ public class TextCommandHandlerImpl implements TextCommandHandler {
 
         return requestByUserId.orElse(null);
     }
+
+    public void setPairRepository(PairRepository pairRepository) {
+        this.pairRepository = pairRepository;
+    }
+
+    public void setTelegramService(TelegramService telegramService) {
+        this.telegramService = telegramService;
+    }
+
+    public void setRequestService(RequestService requestService) {
+        this.requestService = requestService;
+    }
 }

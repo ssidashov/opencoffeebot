@@ -3,25 +3,61 @@ package ru.open.khm.cofeebot.service.telegram;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
+import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import ru.open.khm.cofeebot.CofeebotProperties;
 
+import javax.annotation.PostConstruct;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @Slf4j
 public class TelegramBot extends TelegramLongPollingCommandBot {
-    private final TextCommandHandler textCommandHandler;
+    private final TelegramBotsApi telegramBotsApi;
     private final CofeebotProperties cofeebotProperties;
+    private final Supplier<CommandFactory> commandFactorySupplier;
+    private final Supplier<TextCommandHandler> textCommandHandlerFactory;
 
     public TelegramBot(DefaultBotOptions botOptions
-            , TextCommandHandler textCommandHandler
+            , Supplier<CommandFactory> commandFactorySupplier
+            , Supplier<TextCommandHandler> textCommandHandlerFactory
+            , TelegramBotsApi telegramBotsApi
             , CofeebotProperties cofeebotProperties) {
         super(botOptions, cofeebotProperties.getBotName());
-        this.textCommandHandler = textCommandHandler;
         this.cofeebotProperties = cofeebotProperties;
-        log.info("Initializing Bot...");
+        this.telegramBotsApi = telegramBotsApi;
+        this.commandFactorySupplier = commandFactorySupplier;
+        this.textCommandHandlerFactory = textCommandHandlerFactory;
+    }
+
+    @Override
+    public String getBotToken() {
+        return cofeebotProperties.getBotToken();
+    }
+
+    // обработка сообщения не начинающегося с '/'
+    @Override
+    public void processNonCommandUpdate(Update update) {
+        Consumer<SendMessage> sender = (SendMessage s) -> {
+            try {
+                this.execute(s);
+            } catch (TelegramApiException e) {
+                throw new RuntimeException(e);
+            }
+        };
+
+        textCommandHandlerFactory.get().handle(update, sender);
+    }
+
+    @PostConstruct
+    public void init() throws TelegramApiRequestException {
+        CommandFactory commandFactory = commandFactorySupplier.get();
+        this.register(commandFactory.createStartCommand());
+        this.register(commandFactory.createCancelCommand());
+        this.register(commandFactory.createCreateRequestCommand());
 
         // обработка неизвестной команды
         log.info("Registering default action'...");
@@ -38,59 +74,10 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
                 log.error("Error while replying unknown command to user {}.", message.getFrom(), e);
             }
         }));
-    }
 
-    @Override
-    public String getBotToken() {
-        return cofeebotProperties.getBotToken();
-    }
+        telegramBotsApi.registerBot(this);
 
-    // обработка сообщения не начинающегося с '/'
-    @Override
-    public void processNonCommandUpdate(Update update) {
-        Consumer<SendMessage> sender = (SendMessage s) -> {
-            try{
-                this.execute(s);
-            } catch (TelegramApiException e) {
-                throw new RuntimeException(e);
-            }
-        };
-
-        textCommandHandler.handle(update, sender);
-
-//        log.info("Processing non-command update...");
-//
-//        if (!update.hasMessage()) {
-//            log.error("Update doesn't have a body!");
-//            throw new IllegalStateException("Update doesn't have a body!");
-//        }
-//
-//        Message msg = update.getMessage();
-//        User user = msg.getFrom();
-//
-//        log.info("PROCESSING MESSAGE", user.getId());
-//
-//        if (!canSendMessage(user, msg)) {
-//            return;
-//        }
-//
-//        String clearMessage = msg.getText();
-//        String messageForUsers = String.format("%s:\n%s", mAnonymouses.getDisplayedName(user), msg.getText());
-//
-//        SendMessage answer = new SendMessage();
-//
-//        // отправка ответа отправителю о том, что его сообщение получено
-//        answer.setText(clearMessage);
-//        answer.setChatId(msg.getChatId());
-//        replyToUser(answer, user, clearMessage);
-//
-//        // отправка сообщения всем остальным пользователям бота
-//        answer.setText(messageForUsers);
-//        Stream<Anonymous> anonymouses = mAnonymouses.anonymouses();
-//        anonymouses.filter(a -> !a.getUser().equals(user))
-//                .forEach(a -> {
-//                    answer.setChatId(a.getChat().getId());
-//                    sendMessageToUser(answer, a.getUser(), user);
-//                });
+        log.info("Registering TelegramBot...");
+        log.info("TelegramBot bot is ready for work!");
     }
 }

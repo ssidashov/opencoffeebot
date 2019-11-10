@@ -12,25 +12,31 @@ import ru.open.khm.cofeebot.service.TelegramService;
 import ru.open.khm.cofeebot.service.request.RequestService;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @Slf4j
 public class StartCommand extends ChatBotCommand {
-    private final TelegramService telegramService;
-    private final UserRepository userRepository;
-    private final RequestService requestService;
+    public static final String COMMAND_IDENTIFIER = "start";
+    public static final String COMMAND_DESCRIPTION = "Start using bot";
+    private final Supplier<TelegramService> telegramServiceFactory;
+    private final Supplier<UserRepository> userRepositoryFactory;
+    private final Supplier<RequestService> requestServiceFactory;
 
-    public StartCommand(TelegramService telegramService
-            , UserRepository userRepository
-            , RequestService requestService) {
-        super("start", "Start using bot");
-        this.telegramService = telegramService;
-        this.userRepository = userRepository;
-        this.requestService = requestService;
+    public StartCommand(Supplier<TelegramService> telegramServiceFactory
+            , Supplier<UserRepository> userRepositoryFactory
+            , Supplier<RequestService> requestServiceFactory) {
+        super(COMMAND_IDENTIFIER, COMMAND_DESCRIPTION);
+        this.telegramServiceFactory = telegramServiceFactory;
+        this.userRepositoryFactory = userRepositoryFactory;
+        this.requestServiceFactory = requestServiceFactory;
     }
 
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
-        log.info("User " + user.getUserName());
+        UserRepository userRepository = userRepositoryFactory.get();
+        RequestService requestService = requestServiceFactory.get();
+        log.info("User " + user.getUserName());;
+        TelegramService telegramService = telegramServiceFactory.get();
         telegramService.registerUserLink(user);
         SendMessage message = new SendMessage();
         message.setChatId(chat.getId().toString());

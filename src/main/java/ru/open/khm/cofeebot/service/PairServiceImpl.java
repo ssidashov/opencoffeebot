@@ -1,6 +1,7 @@
 package ru.open.khm.cofeebot.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.open.khm.cofeebot.entity.*;
 import ru.open.khm.cofeebot.repository.PairRepository;
@@ -15,14 +16,15 @@ import java.util.Optional;
 @Slf4j
 public class PairServiceImpl implements PairService {
     private final PairRepository pairRepository;
-    private final TelegramService telegramService;
+
+    @Autowired
+    private TelegramService telegramService;
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    public PairServiceImpl(PairRepository pairRepository, TelegramService telegramService) {
+    public PairServiceImpl(PairRepository pairRepository) {
         this.pairRepository = pairRepository;
-        this.telegramService = telegramService;
     }
 
     @Override
@@ -95,5 +97,9 @@ public class PairServiceImpl implements PairService {
         } else {
             pair.setPairStatus(PairStatus.REJECTED);
         }
+    }
+
+    public void setTelegramService(TelegramService telegramService) {
+        this.telegramService = telegramService;
     }
 }

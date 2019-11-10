@@ -10,23 +10,27 @@ import ru.open.khm.cofeebot.service.TelegramService;
 import ru.open.khm.cofeebot.service.request.RequestService;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @Slf4j
 public class CancelCommand extends ChatBotCommand {
-    private final TelegramService telegramService;
-    private final RequestService requestService;
+    public static final String COMMAND_IDENTIFIER = "cancel";
+    public static final String COMMAND_DESCRIPTION = "Cancel current coffee request";
+    private final Supplier<TelegramService> telegramServiceFactory;
+    private final Supplier<RequestService> requestServiceFactory;
 
-    public CancelCommand(TelegramService telegramService
-            , RequestService requestService) {
-        super("cancel", "Cancel current coffee request");
-        this.telegramService = telegramService;
-        this.requestService = requestService;
+    public CancelCommand(Supplier<TelegramService> telegramServiceFactory, Supplier<RequestService> requestServiceFactory) {
+        super(COMMAND_IDENTIFIER, COMMAND_DESCRIPTION);
+        this.requestServiceFactory = requestServiceFactory;
+        this.telegramServiceFactory = telegramServiceFactory;
     }
 
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
+        RequestService requestService = requestServiceFactory.get();
         String userName = user.getUserName();
         log.info("User " + user.getUserName());
+        TelegramService telegramService = telegramServiceFactory.get();
         telegramService.registerUserLink(user);
         String userIdByTelegramUser = telegramService.getUserIdByTelegramUser(userName);
         if (null == userIdByTelegramUser) {

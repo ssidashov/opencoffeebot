@@ -1,6 +1,5 @@
 package ru.open.khm.cofeebot.repository;
 
-import org.bouncycastle.cert.ocsp.Req;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.open.khm.cofeebot.entity.Request;

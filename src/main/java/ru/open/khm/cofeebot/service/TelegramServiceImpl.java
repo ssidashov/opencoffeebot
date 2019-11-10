@@ -2,6 +2,7 @@ package ru.open.khm.cofeebot.service;
 
 import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -17,6 +18,7 @@ import java.util.Optional;
 
 @Service
 @Slf4j
+@Lazy
 public class TelegramServiceImpl implements TelegramService {
     private final Map<String, Integer> telegramUserIdsByUserNames = new HashMap<>();
     private final TelegramBot telegramBot;
