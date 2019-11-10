@@ -7,7 +7,7 @@ public enum RequestStatusType {
     , REJECTED(true, PairDecision.REJECTED)
     , REJECTED_BLACKLIST(true, PairDecision.REJECTED)
     , ACCEPTED(true, PairDecision.ACCEPTED)
-    , ACCEPT_TIMED_OUT(true, PairDecision.REJECTED_TIMEOUT)
+    , ACCEPT_TIMED_OUT(true, PairDecision.REJECTED)
     , SKIPPED(true, PairDecision.REJECTED);
 
     private final boolean aFinal;
