@@ -17,6 +17,9 @@ import ru.open.khm.cofeebot.rest.RequestInput;
 import ru.open.khm.cofeebot.service.PairService;
 import ru.open.khm.cofeebot.service.TelegramService;
 
+import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
+import javax.persistence.PersistenceContext;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -33,6 +36,9 @@ public class RequestServiceImpl implements RequestService {
 
     @Autowired
     private TelegramService telegramService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public RequestServiceImpl(RequestRepository requestRepository
             , UserRepository userRepository
@@ -85,6 +91,8 @@ public class RequestServiceImpl implements RequestService {
     public void cancelRequest(String id) {
         Optional<Request> byId = requestRepository.findById(id);
         Request request = byId.orElseThrow(() -> new IllegalArgumentException("No request with id " + id));
+        entityManager.lock(request, LockModeType.PESSIMISTIC_WRITE);
+        entityManager.refresh(request);
         if (request.getRequestStatusType() != RequestStatusType.CREATED && request.getRequestStatusType() != RequestStatusType.PAIRED) {
             throw new IllegalStateException("Cannot cancel already processed request");
         }
@@ -116,6 +124,8 @@ public class RequestServiceImpl implements RequestService {
     public void rejectRequest(String id, RequestStatusType typeToReject) {
         Optional<Request> byId = requestRepository.findById(id);
         Request request = byId.orElseThrow(() -> new IllegalArgumentException("No request with id " + id));
+        entityManager.lock(request, LockModeType.PESSIMISTIC_WRITE);
+        entityManager.refresh(request);
         if (request.getRequestStatusType() != RequestStatusType.PAIRED) {
             throw new IllegalStateException("Cannot cancel already processed request");
         }
@@ -164,6 +174,8 @@ public class RequestServiceImpl implements RequestService {
     public void acceptRequest(String id) {
         Optional<Request> byId = requestRepository.findById(id);
         Request request = byId.orElseThrow(() -> new IllegalArgumentException("No request with id " + id));
+        entityManager.lock(request, LockModeType.PESSIMISTIC_WRITE);;
+        entityManager.refresh(request);
         if (request.getRequestStatusType() != RequestStatusType.PAIRED) {
             throw new IllegalStateException("Request status is not pair: " + request.getRequestStatusType());
         }
