@@ -177,7 +177,7 @@ public class TelegramServiceImpl implements TelegramService {
         try {
             SendMessage method = new SendMessage();
             method.setChatId(userId.longValue());
-            method.setText("Мы нашли вам пару! Это " + getDecriptionByRequest(pairRequest) + "! Вы готовы пойти пить кофе? (Да/Нет/ЧС(Черный список))");
+            method.setText("Мы нашли вам пару! Это " + getDecriptionByRequest(pairRequest) + "\nОтменить заявку можно командой /cancel\nВы готовы пойти пить кофе? (Да/Нет)");
             telegramBot.execute(method);
         } catch (TelegramApiException e) {
             log.error("Cannot send to telegram", e);
@@ -215,9 +215,11 @@ public class TelegramServiceImpl implements TelegramService {
         String name = request.getUser().getLastname() + " " + request.getUser().getFirstname() + " " + request.getUser().getMiddlename();
         sb.append(name + "\n");
         sb.append(" из отдела " + request.getUser().getDepartment() + "\n");
-        sb.append(" место встречи: " + request.getPlace() + "\n");
+        sb.append(" место встречи: " + request.getPlace() + "");
         if (request.isCanPay()) {
-            sb.append("Он даже готов угостить вас!");
+            sb.append("Он даже готов угостить вас!\n");
+        }else{
+            sb.append("!\n");
         }
         return sb.toString();
     }
