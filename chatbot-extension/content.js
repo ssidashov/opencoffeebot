@@ -17,8 +17,8 @@ $(document).ready(function () {
     <form id='dialogOpenCoffeeForm'>\n\
         <input type='hidden' id='userToken' name='userId'>\n\
         <table>\n\
-            <tr><td><input type='checkbox' name='canPay' value='true'><label>Готов угостить</label></td></tr>\n\
-            <tr><td><input type='checkbox' name='myPlace' value='true'><label>У меня на месте</label></td></tr>\n\
+            <tr><td><input type='checkbox' name='canPay' id='canPay' value='true'><label for='canPay'>Готов угостить</label></td></tr>\n\
+            <tr><td><input type='checkbox' name='myPlace' id='myPlace' value='true'><label for='myPlace'>У меня на месте</label></td></tr>\n\
             <tr><td><select name='maxWaitTime'>\n\
                         <option>5</option>\n\
                         <option>15</option>\n\

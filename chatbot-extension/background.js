@@ -29,21 +29,18 @@ chrome.runtime.onInstalled.addListener(function () {
     });
 
     chrome.extension.onMessage.addListener(function (request, sender, callback) {
+        callback('backMsg');
         if (request.cmd == 'registerUser') {
             registerUser();
-            callback('ok');
         }
         if (request.cmd == 'wantCoffee') {
             wantCoffee(request.form);
-            callback('backMsg');
         }
         if (request.cmd == 'paired') {
             pairDecision(request.paired);
-            callback('backMsg');
         }
         if (request.cmd == 'cancel') {
             cancelRequest();
-            callback('backMsg');
         }
     });
 
@@ -292,7 +289,7 @@ function pairDecision(dec) {
 
 function statusTextHtml(data) {
     return "<table>" +
-            (data.request.currentPersonCount != "null" ? ("<tr><td>Количество людей в очереди</td><td>" + data.request.currentPersonCount + "</td></tr>") : "")
+            (data.request.currentPersonCount != undefined ? ("<tr><td>Количество людей в очереди</td><td>" + data.request.currentPersonCount + "</td></tr>") : "")
             + "<tr><td>Время создания вашей заявки</td><td>" + data.request.originalCreated + "</td></tr>"
             + "<tr><td>Место кофепития</td><td>" + data.request.place + "</td></tr>"
             + "<tr><td>Готовность угостить</td><td>" + (data.request.canPay == "true" ? "Да" : "Нет") + "</td></tr>"

@@ -8,7 +8,12 @@ $(document).ready(function () {
         resizable: false,
         height: 490,
         width: 490,
-        modal: true,
+        close: function (event, ui) {
+            $("#status").show();
+        },
+        open: function (event, ui) {
+            $("#status").hide();
+        },
         buttons: {
             "Да": function () {
                 chrome.extension.sendMessage({cmd: 'paired', paired: "accept"}, function (backMessage) {
